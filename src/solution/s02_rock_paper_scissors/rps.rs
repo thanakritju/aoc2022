@@ -1,19 +1,12 @@
 use std::collections::HashMap;
 
-fn rps(rounds: Vec<String>) -> i32 {
-    let mut score = 0;
-    for round in rounds {
-        score += get_score(round)
-    }
-    score
-}
-
-fn rps2(rounds: Vec<String>) -> i32 {
-    let mut score = 0;
-    for round in rounds {
-        score += get_score2(round)
-    }
-    score
+fn rps(rounds: Vec<String>, f: fn(String) -> i32) -> i32 {
+    rounds
+        .into_iter()
+        .map(f)
+        .collect::<Vec<i32>>()
+        .into_iter()
+        .sum()
 }
 
 fn get_score(key: String) -> i32 {
@@ -61,18 +54,18 @@ mod tests {
         let input = load_file_to_string_vectors(String::from(
             "src/solution/s02_rock_paper_scissors/example.txt",
         ));
-        assert_eq!(rps(input), 15);
+        assert_eq!(rps(input, get_score), 15);
         let input = load_file_to_string_vectors(String::from(
             "src/solution/s02_rock_paper_scissors/input.txt",
         ));
-        assert_eq!(rps(input), 12772);
+        assert_eq!(rps(input, get_score), 12772);
         let input = load_file_to_string_vectors(String::from(
             "src/solution/s02_rock_paper_scissors/example.txt",
         ));
-        assert_eq!(rps2(input), 12);
+        assert_eq!(rps(input, get_score2), 12);
         let input = load_file_to_string_vectors(String::from(
             "src/solution/s02_rock_paper_scissors/input.txt",
         ));
-        assert_eq!(rps2(input), 12772);
+        assert_eq!(rps(input, get_score2), 11618);
     }
 }
