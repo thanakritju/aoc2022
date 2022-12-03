@@ -1,4 +1,14 @@
+use crate::utils::load_file::load_file_to_vectors;
 use std::collections::BinaryHeap;
+
+pub fn solution_day1_part1(path: std::path::PathBuf) -> i32 {
+    let input = load_file_to_vectors(path);
+    calorie_counting(input)
+}
+pub fn solution_day1_part2(path: std::path::PathBuf) -> i32 {
+    let input = load_file_to_vectors(path);
+    calorie_counting_top_three(input)
+}
 
 fn calorie_counting(numbers: Vec<Vec<i32>>) -> i32 {
     let mut sums: BinaryHeap<i32> = numbers.iter().map(|n| n.iter().sum()).collect();
@@ -28,19 +38,27 @@ fn calorie_counting_top_three(numbers: Vec<Vec<i32>>) -> i32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::utils::load_file::load_file_to_vectors;
+    use std::path::PathBuf;
 
     use super::*;
 
     #[test]
     fn test_calorie_counting() {
-        let input = load_file_to_vectors(String::from("src/solution/s01/example.txt"));
-        assert_eq!(calorie_counting(input), 24000);
-        let input = load_file_to_vectors(String::from("src/solution/s01/input.txt"));
-        assert_eq!(calorie_counting(input), 69626);
-        let input = load_file_to_vectors(String::from("src/solution/s01/example.txt"));
-        assert_eq!(calorie_counting_top_three(input), 45000);
-        let input = load_file_to_vectors(String::from("src/solution/s01/input.txt"));
-        assert_eq!(calorie_counting_top_three(input), 206780);
+        assert_eq!(
+            solution_day1_part1(PathBuf::from("src/solution/s01/example.txt")),
+            24000
+        );
+        assert_eq!(
+            solution_day1_part1(PathBuf::from("src/solution/s01/input.txt")),
+            69626
+        );
+        assert_eq!(
+            solution_day1_part2(PathBuf::from("src/solution/s01/example.txt")),
+            45000
+        );
+        assert_eq!(
+            solution_day1_part2(PathBuf::from("src/solution/s01/input.txt")),
+            206780
+        );
     }
 }

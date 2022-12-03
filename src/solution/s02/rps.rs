@@ -1,5 +1,17 @@
 use std::collections::HashMap;
 
+use crate::utils::load_file::load_file_to_string_vectors;
+
+pub fn solution_day2_part1(path: std::path::PathBuf) -> i32 {
+    let input = load_file_to_string_vectors(path);
+    rock_paper_scissors(input, get_score)
+}
+
+pub fn solution_day2_part2(path: std::path::PathBuf) -> i32 {
+    let input = load_file_to_string_vectors(path);
+    rock_paper_scissors(input, get_score2)
+}
+
 fn rock_paper_scissors(rounds: Vec<String>, f: fn(String) -> i32) -> i32 {
     rounds
         .into_iter()
@@ -45,19 +57,27 @@ fn get_score2(key: String) -> i32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::utils::load_file::load_file_to_string_vectors;
+    use std::path::PathBuf;
 
     use super::*;
 
     #[test]
     fn test_rps() {
-        let input = load_file_to_string_vectors(String::from("src/solution/s02/example.txt"));
-        assert_eq!(rock_paper_scissors(input, get_score), 15);
-        let input = load_file_to_string_vectors(String::from("src/solution/s02/input.txt"));
-        assert_eq!(rock_paper_scissors(input, get_score), 12772);
-        let input = load_file_to_string_vectors(String::from("src/solution/s02/example.txt"));
-        assert_eq!(rock_paper_scissors(input, get_score2), 12);
-        let input = load_file_to_string_vectors(String::from("src/solution/s02/input.txt"));
-        assert_eq!(rock_paper_scissors(input, get_score2), 11618);
+        assert_eq!(
+            solution_day2_part1(PathBuf::from("src/solution/s02/example.txt")),
+            15
+        );
+        assert_eq!(
+            solution_day2_part1(PathBuf::from("src/solution/s02/input.txt")),
+            12772
+        );
+        assert_eq!(
+            solution_day2_part2(PathBuf::from("src/solution/s02/example.txt")),
+            12
+        );
+        assert_eq!(
+            solution_day2_part2(PathBuf::from("src/solution/s02/input.txt")),
+            11618
+        );
     }
 }
