@@ -28,25 +28,19 @@ fn calorie_counting_top_three(numbers: Vec<Vec<i32>>) -> i32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::util::load_file::load_file_to_vectors;
+    use crate::utils::load_file::load_file_to_vectors;
 
     use super::*;
 
     #[test]
     fn test_calorie_counting() {
-        let input = load_file_to_vectors(String::from(
-            "src/solution/s01_calorie_counting/example.txt",
-        ));
+        let input = load_file_to_vectors(String::from("src/solution/s01/example.txt"));
         assert_eq!(calorie_counting(input), 24000);
-        let input =
-            load_file_to_vectors(String::from("src/solution/s01_calorie_counting/input.txt"));
+        let input = load_file_to_vectors(String::from("src/solution/s01/input.txt"));
         assert_eq!(calorie_counting(input), 69626);
-        let input = load_file_to_vectors(String::from(
-            "src/solution/s01_calorie_counting/example.txt",
-        ));
+        let input = load_file_to_vectors(String::from("src/solution/s01/example.txt"));
         assert_eq!(calorie_counting_top_three(input), 45000);
-        let input =
-            load_file_to_vectors(String::from("src/solution/s01_calorie_counting/input.txt"));
+        let input = load_file_to_vectors(String::from("src/solution/s01/input.txt"));
         assert_eq!(calorie_counting_top_three(input), 206780);
     }
 }

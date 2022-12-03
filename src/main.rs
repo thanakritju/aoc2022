@@ -1,5 +1,5 @@
 mod solution;
-mod util;
+mod utils;
 
 fn main() {
     println!("Hello, world!");

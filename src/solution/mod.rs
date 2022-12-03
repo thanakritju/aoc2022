@@ -1,2 +1,2 @@
-mod s01_calorie_counting;
-mod s02_rock_paper_scissors;
+mod s01;
+mod s02;

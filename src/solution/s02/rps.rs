@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-fn rps(rounds: Vec<String>, f: fn(String) -> i32) -> i32 {
+fn rock_paper_scissors(rounds: Vec<String>, f: fn(String) -> i32) -> i32 {
     rounds
         .into_iter()
         .map(f)
@@ -45,27 +45,19 @@ fn get_score2(key: String) -> i32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::util::load_file::load_file_to_string_vectors;
+    use crate::utils::load_file::load_file_to_string_vectors;
 
     use super::*;
 
     #[test]
     fn test_rps() {
-        let input = load_file_to_string_vectors(String::from(
-            "src/solution/s02_rock_paper_scissors/example.txt",
-        ));
-        assert_eq!(rps(input, get_score), 15);
-        let input = load_file_to_string_vectors(String::from(
-            "src/solution/s02_rock_paper_scissors/input.txt",
-        ));
-        assert_eq!(rps(input, get_score), 12772);
-        let input = load_file_to_string_vectors(String::from(
-            "src/solution/s02_rock_paper_scissors/example.txt",
-        ));
-        assert_eq!(rps(input, get_score2), 12);
-        let input = load_file_to_string_vectors(String::from(
-            "src/solution/s02_rock_paper_scissors/input.txt",
-        ));
-        assert_eq!(rps(input, get_score2), 11618);
+        let input = load_file_to_string_vectors(String::from("src/solution/s02/example.txt"));
+        assert_eq!(rock_paper_scissors(input, get_score), 15);
+        let input = load_file_to_string_vectors(String::from("src/solution/s02/input.txt"));
+        assert_eq!(rock_paper_scissors(input, get_score), 12772);
+        let input = load_file_to_string_vectors(String::from("src/solution/s02/example.txt"));
+        assert_eq!(rock_paper_scissors(input, get_score2), 12);
+        let input = load_file_to_string_vectors(String::from("src/solution/s02/input.txt"));
+        assert_eq!(rock_paper_scissors(input, get_score2), 11618);
     }
 }
