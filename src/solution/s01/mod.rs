@@ -1,1 +1,1 @@
-mod calorie_counting;
+pub mod calorie_counting;

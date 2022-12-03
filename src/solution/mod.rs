@@ -1,2 +1,3 @@
-mod s01;
-mod s02;
+pub mod s01;
+pub mod s02;
+pub mod s03;

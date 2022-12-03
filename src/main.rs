@@ -2,6 +2,7 @@ mod solution;
 mod utils;
 
 use clap::Parser;
+use solution::s01::calorie_counting::solution_day1_part1;
 
 #[derive(Parser)]
 struct Cli {
@@ -10,5 +11,5 @@ struct Cli {
 }
 
 fn main() {
-    println!("Hello, world!");
+    let args = Cli::parse();
 }
