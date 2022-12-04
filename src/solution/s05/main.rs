@@ -1,3 +1,4 @@
+
 pub fn solution_day5_part1(path: std::path::PathBuf) -> i32 {
     0
 }
@@ -16,19 +17,19 @@ mod tests {
     fn test_solution() {
         assert_eq!(
             solution_day5_part1(PathBuf::from("src/solution/s04/example.txt")),
-            -1
+            0
         );
         assert_eq!(
             solution_day5_part1(PathBuf::from("src/solution/s04/input.txt")),
-            -1
+            0
         );
         assert_eq!(
             solution_day5_part2(PathBuf::from("src/solution/s04/example.txt")),
-            -1
+            0
         );
         assert_eq!(
             solution_day5_part2(PathBuf::from("src/solution/s04/input.txt")),
-            -1
+            0
         );
     }
 }
