@@ -43,7 +43,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_calorie_counting() {
+    fn test_solution() {
         assert_eq!(
             solution_day1_part1(PathBuf::from("src/solution/s01/example.txt")),
             24000

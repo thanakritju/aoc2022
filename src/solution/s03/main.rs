@@ -100,7 +100,7 @@ mod tests {
     }
 
     #[test]
-    fn test_reorganize() {
+    fn test_solution() {
         assert_eq!(
             solution_day3_part1(PathBuf::from("src/solution/s03/example.txt")),
             157

@@ -2,14 +2,10 @@ mod solution;
 mod utils;
 
 use clap::Parser;
-use solution::s01::calorie_counting::solution_day1_part1;
-use solution::s01::calorie_counting::solution_day1_part2;
-use solution::s02::rps::solution_day2_part1;
-use solution::s02::rps::solution_day2_part2;
-use solution::s03::reorganize::solution_day3_part1;
-use solution::s03::reorganize::solution_day3_part2;
-use solution::s04::campcleanup::solution_day4_part1;
-use solution::s04::campcleanup::solution_day4_part2;
+use solution::s01::main::*;
+use solution::s02::main::*;
+use solution::s03::main::*;
+use solution::s04::main::*;
 
 #[derive(Parser)]
 struct Cli {

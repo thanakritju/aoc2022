@@ -62,7 +62,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_rps() {
+    fn test_solution() {
         assert_eq!(
             solution_day2_part1(PathBuf::from("src/solution/s02/example.txt")),
             15

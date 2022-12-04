@@ -1,1 +1,1 @@
-pub mod campcleanup;
+pub mod main;

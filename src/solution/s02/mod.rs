@@ -1,1 +1,1 @@
-pub mod rps;
+pub mod main;
