@@ -8,6 +8,8 @@ use solution::s02::rps::solution_day2_part1;
 use solution::s02::rps::solution_day2_part2;
 use solution::s03::reorganize::solution_day3_part1;
 use solution::s03::reorganize::solution_day3_part2;
+use solution::s04::campcleanup::solution_day4_part1;
+use solution::s04::campcleanup::solution_day4_part2;
 
 #[derive(Parser)]
 struct Cli {
@@ -36,6 +38,12 @@ fn main() {
         }
         "day3part2" => {
             println!("{}", solution_day3_part2(args.path))
+        }
+        "day4part1" => {
+            println!("{}", solution_day4_part1(args.path))
+        }
+        "day4part2" => {
+            println!("{}", solution_day4_part2(args.path))
         }
         _ => println!("In valid pattern"),
     }
