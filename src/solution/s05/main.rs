@@ -13,20 +13,29 @@ pub fn solution_day5_part1(path: std::path::PathBuf) -> String {
             i += 1
         }
     }
+    get_answer(stack)
+}
 
+pub fn solution_day5_part2(path: std::path::PathBuf) -> String {
+    let input = load_file_split_two_lines(path);
+    let (mut stack, commands) = parse_input(input);
+    for (times, source, target) in commands {
+        let num = stack[source].len() - times;
+        let drained: Vec<char> = stack[source].drain(num..).collect();
+        stack[target].extend(drained);
+    }
+    get_answer(stack)
+}
+
+fn get_answer(stack: [Vec<char>; 10]) -> String {
     let mut ans = "".to_string();
-
     for i in 1..10 {
-        match stack[i].pop() {
+        match stack[i].last() {
             Some(c) => ans = format!("{}{}", ans, c),
             None => {}
         };
     }
     ans.to_string()
-}
-
-pub fn solution_day5_part2(path: std::path::PathBuf) -> String {
-    "0".to_string()
 }
 
 fn parse_input(lines: Vec<String>) -> ([Vec<char>; 10], Vec<(usize, usize, usize)>) {
@@ -107,15 +116,15 @@ mod tests {
         );
         assert_eq!(
             solution_day5_part1(PathBuf::from("src/solution/s05/input.txt")),
-            "0"
+            "QNNTGTPFN"
         );
-        // assert_eq!(
-        //     solution_day5_part2(PathBuf::from("src/solution/s05/example.txt")),
-        //     "0"
-        // );
-        // assert_eq!(
-        //     solution_day5_part2(PathBuf::from("src/solution/s05/input.txt")),
-        //     "0"
-        // );
+        assert_eq!(
+            solution_day5_part2(PathBuf::from("src/solution/s05/example.txt")),
+            "MCD"
+        );
+        assert_eq!(
+            solution_day5_part2(PathBuf::from("src/solution/s05/input.txt")),
+            "GGNPJBTTR"
+        );
     }
 }
