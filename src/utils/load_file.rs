@@ -1,11 +1,19 @@
 use std::{fs, path::Path};
 
+#[cfg(windows)]
+const TWO_LINE_ENDING: &'static str = "\r\n\r\n";
+#[cfg(not(windows))]
+const TWO_LINE_ENDING: &'static str = "\n\n";
+
 pub fn load_file_to_vectors<P>(file_name: P) -> Vec<Vec<i32>>
 where
     P: AsRef<Path>,
 {
     let str = fs::read_to_string(file_name).expect("Error in reading the file");
-    let vecs = str.split("\n\n").map(string_to_int_vector).collect();
+    let vecs = str
+        .split(TWO_LINE_ENDING)
+        .map(string_to_int_vector)
+        .collect();
     vecs
 }
 
@@ -14,7 +22,10 @@ where
     P: AsRef<Path>,
 {
     let str = fs::read_to_string(file_name).expect("Error in reading the file");
-    let vecs = str.split("\n\n").map(|s| String::from(s)).collect();
+    let vecs = str
+        .split(TWO_LINE_ENDING)
+        .map(|s| String::from(s))
+        .collect();
     vecs
 }
 
