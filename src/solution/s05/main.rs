@@ -16,19 +16,19 @@ mod tests {
     #[test]
     fn test_solution() {
         assert_eq!(
-            solution_day5_part1(PathBuf::from("src/solution/s04/example.txt")),
+            solution_day5_part1(PathBuf::from("src/solution/05/example.txt")),
             0
         );
         assert_eq!(
-            solution_day5_part1(PathBuf::from("src/solution/s04/input.txt")),
+            solution_day5_part1(PathBuf::from("src/solution/s05/input.txt")),
             0
         );
         assert_eq!(
-            solution_day5_part2(PathBuf::from("src/solution/s04/example.txt")),
+            solution_day5_part2(PathBuf::from("src/solution/s05/example.txt")),
             0
         );
         assert_eq!(
-            solution_day5_part2(PathBuf::from("src/solution/s04/input.txt")),
+            solution_day5_part2(PathBuf::from("src/solution/s05/input.txt")),
             0
         );
     }
