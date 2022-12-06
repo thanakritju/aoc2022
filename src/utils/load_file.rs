@@ -37,6 +37,14 @@ where
     let vecs = str.lines().map(|s| String::from(s)).collect();
     vecs
 }
+pub fn load_file_to_string<P>(file_name: P) -> String
+where
+    P: AsRef<Path>,
+{
+    let str = fs::read_to_string(file_name).expect("Error in reading the file");
+    let vecs: Vec<String> = str.lines().map(|s| String::from(s)).collect();
+    vecs.get(0).expect("No data").to_string()
+}
 
 fn string_to_int_vector(s: &str) -> Vec<i32> {
     let numbers: Vec<i32> = s.lines().map(|s| s.parse().expect("parse error")).collect();

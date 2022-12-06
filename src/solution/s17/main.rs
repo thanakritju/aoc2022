@@ -16,7 +16,7 @@ mod tests {
     #[test]
     fn test_solution() {
         assert_eq!(
-            solution_day17_part1(PathBuf::from("src/solution/17/example.txt")),
+            solution_day17_part1(PathBuf::from("src/solution/s17/example.txt")),
             0
         );
         assert_eq!(
