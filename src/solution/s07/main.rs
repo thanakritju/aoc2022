@@ -5,11 +5,48 @@ use crate::utils::load_file::load_file_to_string_vectors;
 pub fn solution_day7_part1(path: std::path::PathBuf) -> i32 {
     let input = load_file_to_string_vectors(path);
     let root = parse_input(input);
-    0
+    let mut stack: Vec<Rc<RefCell<Node>>> = Default::default();
+    let mut current = Rc::clone(&root);
+    let mut ans = 0;
+    stack.push(current);
+    while !stack.is_empty() {
+        current = stack.pop().expect("no data");
+        let s = current.borrow().size();
+        if s < 100000 && current.borrow().is_directory {
+            ans += s
+        }
+
+        for n in &current.borrow().children {
+            let current_clone = Rc::clone(&n);
+            stack.push(current_clone)
+        }
+    }
+    ans
 }
 
 pub fn solution_day7_part2(path: std::path::PathBuf) -> i32 {
-    0
+    let input = load_file_to_string_vectors(path);
+    let root = parse_input(input);
+    let mut stack: Vec<Rc<RefCell<Node>>> = Default::default();
+    let mut current = Rc::clone(&root);
+
+    let currently_used = root.borrow().size();
+    let need_more_space = currently_used - 40000000;
+    let mut ans = 70000000;
+    stack.push(current);
+    while !stack.is_empty() {
+        current = stack.pop().expect("no data");
+        let s = current.borrow().size();
+        if s > need_more_space && s < ans && current.borrow().is_directory {
+            ans = s
+        }
+
+        for n in &current.borrow().children {
+            let current_clone = Rc::clone(&n);
+            stack.push(current_clone)
+        }
+    }
+    ans
 }
 
 fn parse_input(commands: Vec<String>) -> Rc<RefCell<Node>> {
@@ -87,11 +124,7 @@ impl Node {
         self.children.push(new_node);
     }
 
-    pub fn print(&self) -> String {
-        self._print(0)
-    }
-
-    pub fn _print(&self, height: usize) -> String {
+    pub fn print(&self, height: usize) -> String {
         if !self.is_directory {
             return "  ".repeat(height) + &format!("- {} (file, size={})\n", self.name, self.size);
         } else {
@@ -100,9 +133,17 @@ impl Node {
                 + &self
                     .children
                     .iter()
-                    .map(|tn| tn.borrow()._print(height + 1))
+                    .map(|tn| tn.borrow().print(height + 1))
                     .collect::<Vec<String>>()
                     .join("");
+        }
+    }
+
+    pub fn size(&self) -> i32 {
+        if !self.is_directory {
+            return self.size;
+        } else {
+            return self.children.iter().map(|tn| tn.borrow().size()).sum();
         }
     }
 }
@@ -114,11 +155,21 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_size() {
+        let input = load_file_to_string_vectors("src/solution/s07/example.txt");
+        let root = parse_input(input);
+        assert_eq!(root.borrow().size(), 48381165);
+        let input = load_file_to_string_vectors("src/solution/s07/input.txt");
+        let root = parse_input(input);
+        assert_eq!(root.borrow().size(), 46552309);
+    }
+
+    #[test]
     fn test_print() {
         let input = load_file_to_string_vectors("src/solution/s07/example.txt");
         let root = parse_input(input);
         assert_eq!(
-            root.borrow().print(),
+            root.borrow().print(0),
             "- / (dir)
   - a (dir)
     - e (dir)
@@ -145,15 +196,15 @@ mod tests {
         );
         assert_eq!(
             solution_day7_part1(PathBuf::from("src/solution/s07/input.txt")),
-            0
+            1723892
         );
         assert_eq!(
             solution_day7_part2(PathBuf::from("src/solution/s07/example.txt")),
-            0
+            24933642
         );
         assert_eq!(
             solution_day7_part2(PathBuf::from("src/solution/s07/input.txt")),
-            0
+            8474158
         );
     }
 }
