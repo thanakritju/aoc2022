@@ -1,106 +1,219 @@
+use std::collections::{BinaryHeap, HashSet};
+
 use crate::utils::load_file::load_file_to_string_vectors;
 
 pub fn solution_day8_part1(path: std::path::PathBuf) -> i32 {
     let input = load_file_to_string_vectors(path);
-    let grid = parse_input(input);
-    0
+    let width = input.get(0).expect("No data").len();
+    let height = input.len();
+    let mut grid_raw = vec![0; width * height];
+    let mut grid_base: Vec<_> = grid_raw.as_mut_slice().chunks_mut(width).collect();
+    let grid = grid_base.as_mut_slice();
+    for (j, line) in input.iter().enumerate() {
+        for (i, c) in line.chars().enumerate() {
+            grid[j][i] = c.to_digit(10).unwrap()
+        }
+    }
+
+    let mut visited: HashSet<(usize, usize)> = Default::default();
+    let mut visible: HashSet<(usize, usize)> = Default::default();
+    let mut queue: Vec<(usize, usize)> = Default::default();
+    queue.push((0, 0));
+    while !queue.is_empty() {
+        let (i, j) = queue.pop().expect("no data");
+        visited.insert((i, j));
+
+        if is_in_the_edge(width, height, i, j) {
+            visible.insert((i, j));
+        } else {
+            if visible.get(&(i, j)).is_none() {
+                if is_visible(width, height, i, j, grid) {
+                    visible.insert((i, j));
+                }
+            }
+        }
+
+        for (ni, nj) in get_neighbors(width, height, i, j) {
+            let is_visited = visited.get(&(ni, nj)).is_some();
+            if !is_visited {
+                queue.push((ni, nj))
+            }
+        }
+    }
+    visible.len().try_into().unwrap()
 }
 
 pub fn solution_day8_part2(path: std::path::PathBuf) -> i32 {
-    0
-}
-
-fn parse_input(input: Vec<String>) -> Grid {
-    Grid::new(input)
-}
-
-#[derive(Copy, Clone)]
-struct Tree {
-    x: i32,
-    y: i32,
-    h: i32,
-}
-
-impl Tree {
-    pub fn new(x: i32, y: i32, h: i32) -> Tree {
-        return Tree { x: x, y: y, h: h };
-    }
-}
-
-struct Grid {
-    trees: Vec<Vec<Tree>>,
-    max_x: usize,
-    max_y: usize,
-}
-
-impl Grid {
-    pub fn new(lines: Vec<String>) -> Grid {
-        let mut grid = Grid {
-            trees: Default::default(),
-            max_x: lines.get(0).expect("No data").len(),
-            max_y: lines.len(),
-        };
-        for (i, line) in lines.iter().enumerate() {
-            grid.add_line(line, i as i32)
-        }
-
-        return grid;
-    }
-
-    fn add_line(&mut self, line: &String, nrow: i32) {
-        let mut row: Vec<Tree> = Default::default();
+    let input = load_file_to_string_vectors(path);
+    let width = input.get(0).expect("No data").len();
+    let height = input.len();
+    let mut grid_raw = vec![0; width * height];
+    let mut grid_base: Vec<_> = grid_raw.as_mut_slice().chunks_mut(width).collect();
+    let grid = grid_base.as_mut_slice();
+    for (j, line) in input.iter().enumerate() {
         for (i, c) in line.chars().enumerate() {
-            let tree = Tree::new(i as i32, nrow as i32, c as i32);
-            row.push(tree)
+            grid[j][i] = c.to_digit(10).unwrap()
         }
     }
 
-    pub fn get_tree_height(self, i: usize, j: usize) -> i32 {
-        let row = self.trees.get(i).expect("No data");
-        row.get(j).expect("No data").h
-    }
+    let mut visited: HashSet<(usize, usize)> = Default::default();
+    let mut heap: BinaryHeap<i32> = BinaryHeap::new();
+    let mut queue: Vec<(usize, usize)> = Default::default();
+    queue.push((0, 0));
+    while !queue.is_empty() {
+        let (i, j) = queue.pop().expect("no data");
+        visited.insert((i, j));
 
-    pub fn get_tree(self, i: usize, j: usize) -> Tree {
-        let row = self.trees.get(i).expect("No data");
-        row.get(j).expect("No data").clone()
-    }
-
-    pub fn is_tree_visible(self, i: usize, j: usize) -> bool {
-        if self.is_in_the_edge(i, j) {
-            return true;
+        if !is_in_the_edge(width, height, i, j) {
+            heap.push(get_score(width, height, i, j, grid));
         }
-        return false;
-    }
 
-    pub fn get_neibours(self, i: usize, j: usize) -> Vec<Tree> {
-        let mut neibours = vec![];
-        for (ni, nj) in vec![(i + 1, j), (i - 1, j), (i, j + 1), (i, j - 1)] {
-            if self.is_valid_grid(ni, nj) {
-                neibours.push(self.get_tree(ni, nj))
+        for (ni, nj) in get_neighbors(width, height, i, j) {
+            let is_visited = visited.get(&(ni, nj)).is_some();
+            if !is_visited {
+                queue.push((ni, nj))
             }
         }
-        neibours
     }
+    *heap.peek().expect("No data")
+}
 
-    pub fn is_in_the_edge(self, i: usize, j: usize) -> bool {
-        if i == 0 || i == self.max_x - 1 {
-            return true;
+pub fn is_visible(
+    width: usize,
+    height: usize,
+    i: usize,
+    j: usize,
+    grid: &mut [&mut [u32]],
+) -> bool {
+    let h = grid[j][i];
+    get_bottoms(width, height, i, j)
+        .into_iter()
+        .all(|(x, y)| h > grid[y][x])
+        || get_rights(width, height, i, j)
+            .into_iter()
+            .all(|(x, y)| h > grid[y][x])
+        || get_lefts(width, height, i, j)
+            .into_iter()
+            .all(|(x, y)| h > grid[y][x])
+        || get_tops(width, height, i, j)
+            .into_iter()
+            .all(|(x, y)| h > grid[y][x])
+}
+
+pub fn get_score(width: usize, height: usize, i: usize, j: usize, grid: &mut [&mut [u32]]) -> i32 {
+    let mut score = 1;
+    let h = grid[j][i];
+    let mut count = 0;
+    for (x, y) in get_bottoms(width, height, i, j) {
+        if h > grid[y][x] {
+            count += 1;
+        } else {
+            count += 1;
+            break;
         }
-        if j == 0 || j == self.max_y - 1 {
-            return true;
-        }
-        return false;
     }
+    score *= count;
+    count = 0;
+    for (x, y) in get_lefts(width, height, i, j) {
+        if h > grid[y][x] {
+            count += 1;
+        } else {
+            count += 1;
+            break;
+        }
+    }
+    score *= count;
+    count = 0;
+    for (x, y) in get_tops(width, height, i, j) {
+        if h > grid[y][x] {
+            count += 1;
+        } else {
+            count += 1;
+            break;
+        }
+    }
+    score *= count;
+    count = 0;
+    for (x, y) in get_rights(width, height, i, j) {
+        if h > grid[y][x] {
+            count += 1;
+        } else {
+            count += 1;
+            break;
+        }
+    }
+    score *= count;
+    println!("x {} y {} h {} score {}", i, j, h, score);
+    score
+}
 
-    pub fn is_valid_grid(self, i: usize, j: usize) -> bool {
-        if i < 0 || i > self.max_x - 1 {
-            return false;
-        }
-        if j < 0 || j > self.max_y - 1 {
-            return false;
-        }
+pub fn is_in_the_edge(width: usize, height: usize, i: usize, j: usize) -> bool {
+    if i == 0 || i == width - 1 {
         return true;
     }
+    if j == 0 || j == height - 1 {
+        return true;
+    }
+    return false;
+}
+
+pub fn get_neighbors(width: usize, height: usize, i: usize, j: usize) -> Vec<(usize, usize)> {
+    let mut vec = vec![];
+    if i > 0 {
+        vec.push((i - 1, j))
+    }
+    if j > 0 {
+        vec.push((i, j - 1))
+    }
+    if i < width - 1 {
+        vec.push((i + 1, j))
+    }
+    if j < height - 1 {
+        vec.push((i, j + 1))
+    }
+    vec
+}
+
+pub fn get_rights(width: usize, height: usize, i: usize, j: usize) -> Vec<(usize, usize)> {
+    let mut vec = vec![];
+    let mut x = i + 1;
+    while x < width {
+        vec.push((x, j));
+        x += 1;
+    }
+    vec
+}
+
+pub fn get_lefts(width: usize, height: usize, i: usize, j: usize) -> Vec<(usize, usize)> {
+    let mut vec = vec![];
+    let mut x = i - 1;
+    while x > 0 {
+        vec.push((x, j));
+        x -= 1;
+    }
+    vec.push((x, j));
+    vec
+}
+
+pub fn get_tops(width: usize, height: usize, i: usize, j: usize) -> Vec<(usize, usize)> {
+    let mut vec = vec![];
+    let mut y = j + 1;
+    while y < height {
+        vec.push((i, y));
+        y += 1;
+    }
+    vec
+}
+
+pub fn get_bottoms(width: usize, height: usize, i: usize, j: usize) -> Vec<(usize, usize)> {
+    let mut vec = vec![];
+    let mut y = j - 1;
+    while y > 0 {
+        vec.push((i, y));
+        y -= 1;
+    }
+    vec.push((i, y));
+    vec
 }
 
 #[cfg(test)]
@@ -110,22 +223,11 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_is_tree_visible() {
-        let input = load_file_to_string_vectors("src/solution/s08/example.txt");
-        assert_eq!(parse_input(input.to_owned()).is_tree_visible(0, 0), true);
-        assert_eq!(parse_input(input.to_owned()).is_tree_visible(3, 1), false);
-        assert_eq!(parse_input(input.to_owned()).is_tree_visible(3, 2), true);
-        assert_eq!(parse_input(input.to_owned()).is_tree_visible(3, 3), false);
-        assert_eq!(parse_input(input.to_owned()).is_tree_visible(4, 1), true);
-    }
-
-    #[test]
-    fn test_is_in_the_edge() {
-        let input = load_file_to_string_vectors("src/solution/s08/example.txt");
-        assert_eq!(parse_input(input.to_owned()).is_in_the_edge(0, 0), true);
-        assert_eq!(parse_input(input.to_owned()).is_in_the_edge(1, 1), false);
-        assert_eq!(parse_input(input.to_owned()).is_in_the_edge(1, 4), true);
-        assert_eq!(parse_input(input.to_owned()).is_in_the_edge(4, 1), true);
+    fn test_get_directions() {
+        assert_eq!(get_lefts(5, 5, 1, 3), vec![(0, 3)]);
+        assert_eq!(get_rights(5, 5, 1, 3), vec![(2, 3), (3, 3), (4, 3)]);
+        assert_eq!(get_tops(5, 5, 1, 3), vec![(1, 4)]);
+        assert_eq!(get_bottoms(5, 5, 1, 3), vec![(1, 2), (1, 1), (1, 0)]);
     }
 
     #[test]
@@ -136,15 +238,15 @@ mod tests {
         );
         assert_eq!(
             solution_day8_part1(PathBuf::from("src/solution/s08/input.txt")),
-            0
+            1708
         );
         assert_eq!(
             solution_day8_part2(PathBuf::from("src/solution/s08/example.txt")),
-            0
+            8
         );
         assert_eq!(
             solution_day8_part2(PathBuf::from("src/solution/s08/input.txt")),
-            0
+            504000
         );
     }
 }
