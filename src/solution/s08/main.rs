@@ -143,7 +143,6 @@ pub fn get_score(width: usize, height: usize, i: usize, j: usize, grid: &mut [&m
         }
     }
     score *= count;
-    println!("x {} y {} h {} score {}", i, j, h, score);
     score
 }
 

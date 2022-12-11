@@ -50,7 +50,6 @@ fn parse_input(lines: Vec<String>) -> ([Vec<char>; 10], Vec<(usize, usize, usize
 }
 
 fn generate_start_stack(s: String) -> [Vec<char>; 10] {
-    println!("{}", s);
     let mut start_stack: [Vec<char>; 10] = Default::default();
     let vec: Vec<String> = s.lines().map(|s| String::from(s)).rev().collect();
     for line in vec {

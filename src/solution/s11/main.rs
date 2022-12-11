@@ -16,6 +16,11 @@ pub fn solution_day11_part2(path: std::path::PathBuf) -> usize {
 
 fn find_answer(input: Vec<String>, rounds: usize, divided_by_three: bool) -> usize {
     let mut monkeys = parse_input_vec(input);
+    let d = monkeys
+        .iter()
+        .map(|m| m.divisor)
+        .reduce(|d1, d2| d1 * d2)
+        .expect("no data");
     for r in 0..rounds {
         for i in 0..monkeys.len() {
             let monkey = monkeys.get_mut(i).expect("no data");
@@ -30,6 +35,8 @@ fn find_answer(input: Vec<String>, rounds: usize, divided_by_three: bool) -> usi
                 };
                 if divided_by_three {
                     out_num = out_num / 3
+                } else {
+                    out_num = out_num - (out_num / d) * d
                 }
                 let target_monkey_id = match out_num % monkey.divisor {
                     0 => monkey.monkey_if_true,
@@ -40,26 +47,11 @@ fn find_answer(input: Vec<String>, rounds: usize, divided_by_three: bool) -> usi
             monkey.clear();
             for (out_num, target_monkey_id) in tmp {
                 let target_monkey = monkeys.get_mut(target_monkey_id).expect("no data");
-                // target_monkey.add_item(out_num);
-                match divided_by_three {
-                    true => target_monkey.add_item(out_num),
-                    false => target_monkey.add_item(
-                        out_num - ((out_num / target_monkey.divisor) * target_monkey.divisor),
-                    ),
-                }
+                target_monkey.add_item(out_num);
             }
         }
-        for m in &monkeys {
-            println!("round: {} monkey:{} items:{:?}", r + 1, m.id, m.items)
-        }
     }
-    let mut lens: BinaryHeap<usize> = monkeys
-        .iter()
-        .map(|m| {
-            println!("{}", m.inspect_times);
-            m.inspect_times
-        })
-        .collect();
+    let mut lens: BinaryHeap<usize> = monkeys.iter().map(|m| m.inspect_times).collect();
     let mut ans = 1;
     match lens.pop() {
         Some(v) => ans *= v,
@@ -205,13 +197,13 @@ Monkey 0:
             solution_day11_part1(PathBuf::from("src/solution/s11/input.txt")),
             55944
         );
-        // assert_eq!(
-        //     solution_day11_part2(PathBuf::from("src/solution/s11/example.txt")),
-        //     2713310158
-        // );
-        // assert_eq!(
-        //     solution_day11_part2(PathBuf::from("src/solution/s11/input.txt")),
-        //     0
-        // );
+        assert_eq!(
+            solution_day11_part2(PathBuf::from("src/solution/s11/example.txt")),
+            2713310158
+        );
+        assert_eq!(
+            solution_day11_part2(PathBuf::from("src/solution/s11/input.txt")),
+            15117269860
+        );
     }
 }
