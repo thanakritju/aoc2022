@@ -183,13 +183,13 @@ Monkey 0:
             solution_day11_part1(PathBuf::from("src/solution/s11/input.txt")),
             55944
         );
-        assert_eq!(
-            solution_day11_part2(PathBuf::from("src/solution/s11/example.txt")),
-            2713310158
-        );
-        assert_eq!(
-            solution_day11_part2(PathBuf::from("src/solution/s11/input.txt")),
-            0
-        );
+        // assert_eq!(
+        //     solution_day11_part2(PathBuf::from("src/solution/s11/example.txt")),
+        //     2713310158
+        // );
+        // assert_eq!(
+        //     solution_day11_part2(PathBuf::from("src/solution/s11/input.txt")),
+        //     0
+        // );
     }
 }
