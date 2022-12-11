@@ -38,7 +38,6 @@ fn signal_strength(register: i32, cycle: i32) -> i32 {
 fn process<const LEN: usize>(actions: Vec<String>) -> [i32; LEN] {
     let mut arr = [1; LEN];
     let mut ai = 0;
-    let mut num = 0;
     let mut q: VecDeque<i32> = VecDeque::from([0, 0]);
     for i in 0..LEN {
         if i > 0 {
@@ -51,7 +50,7 @@ fn process<const LEN: usize>(actions: Vec<String>) -> [i32; LEN] {
             let action = actions.get(ai % actions.len()).expect("no data");
             if action.starts_with("addx") {
                 let splited: Vec<&str> = action.split("addx ").collect();
-                num = splited
+                let num = splited
                     .get(1)
                     .expect("no data")
                     .parse()

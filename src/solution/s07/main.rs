@@ -124,7 +124,7 @@ impl Node {
         self.children.push(new_node);
     }
 
-    pub fn print(&self, height: usize) -> String {
+    pub fn _print(&self, height: usize) -> String {
         if !self.is_directory {
             return "  ".repeat(height) + &format!("- {} (file, size={})\n", self.name, self.size);
         } else {
@@ -133,7 +133,7 @@ impl Node {
                 + &self
                     .children
                     .iter()
-                    .map(|tn| tn.borrow().print(height + 1))
+                    .map(|tn| tn.borrow()._print(height + 1))
                     .collect::<Vec<String>>()
                     .join("");
         }
@@ -169,7 +169,7 @@ mod tests {
         let input = load_file_to_string_vectors("src/solution/s07/example.txt");
         let root = parse_input(input);
         assert_eq!(
-            root.borrow().print(0),
+            root.borrow()._print(0),
             "- / (dir)
   - a (dir)
     - e (dir)

@@ -174,7 +174,7 @@ pub fn get_neighbors(width: usize, height: usize, i: usize, j: usize) -> Vec<(us
     vec
 }
 
-pub fn get_rights(width: usize, height: usize, i: usize, j: usize) -> Vec<(usize, usize)> {
+pub fn get_rights(width: usize, _: usize, i: usize, j: usize) -> Vec<(usize, usize)> {
     let mut vec = vec![];
     let mut x = i + 1;
     while x < width {
@@ -184,7 +184,7 @@ pub fn get_rights(width: usize, height: usize, i: usize, j: usize) -> Vec<(usize
     vec
 }
 
-pub fn get_lefts(width: usize, height: usize, i: usize, j: usize) -> Vec<(usize, usize)> {
+pub fn get_lefts(_: usize, _: usize, i: usize, j: usize) -> Vec<(usize, usize)> {
     let mut vec = vec![];
     let mut x = i - 1;
     while x > 0 {
@@ -195,7 +195,7 @@ pub fn get_lefts(width: usize, height: usize, i: usize, j: usize) -> Vec<(usize,
     vec
 }
 
-pub fn get_tops(width: usize, height: usize, i: usize, j: usize) -> Vec<(usize, usize)> {
+pub fn get_tops(_: usize, height: usize, i: usize, j: usize) -> Vec<(usize, usize)> {
     let mut vec = vec![];
     let mut y = j + 1;
     while y < height {
@@ -205,7 +205,7 @@ pub fn get_tops(width: usize, height: usize, i: usize, j: usize) -> Vec<(usize, 
     vec
 }
 
-pub fn get_bottoms(width: usize, height: usize, i: usize, j: usize) -> Vec<(usize, usize)> {
+pub fn get_bottoms(_: usize, _: usize, i: usize, j: usize) -> Vec<(usize, usize)> {
     let mut vec = vec![];
     let mut y = j - 1;
     while y > 0 {
