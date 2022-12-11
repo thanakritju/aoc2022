@@ -1,12 +1,11 @@
-use std::collections::VecDeque;
-
 use crate::utils::load_file::load_file_to_string_vectors;
 
 pub fn solution_day10_part1(path: std::path::PathBuf) -> i32 {
     let input = load_file_to_string_vectors(path);
+    let registers: [i32; 220] = process(input);
     vec![20, 60, 100, 140, 180, 220]
         .into_iter()
-        .map(|cycle| signal_strength(process2(cycle, input.to_owned()), cycle as i32))
+        .map(|cycle| signal_strength(registers[cycle - 1], cycle as i32))
         .sum()
 }
 
@@ -18,77 +17,36 @@ fn signal_strength(register: i32, cycle: i32) -> i32 {
     register * cycle
 }
 
-fn process(target_cycle: usize, program: Vec<String>) -> i32 {
-    let mut register = 1;
-    let len = program.len();
-    let mut i: usize = 0;
-    let mut action_index: usize = 0;
-    while i <= target_cycle {
-        let action = program.get(action_index % len).expect("no data");
-        println!(
-            "Start : cycle {} register {} action {}",
-            i + 1,
-            register,
-            action
-        );
-        if action.starts_with("addx ") {
-            let splited: Vec<&str> = action.split("addx ").collect();
-            let num: i32 = splited
-                .get(1)
-                .expect("no data")
-                .parse()
-                .expect("cannot parse");
-            if i < target_cycle - 1 {
-                register += num;
-            }
-            action_index += 1;
-            i += 2;
-        } else {
-            action_index += 1;
-            i += 1;
-        }
-    }
-    // println!("----");
-    register
-}
-
-fn process2(target_cycle: usize, program: Vec<String>) -> i32 {
-    let mut register = 1;
-    let mut mem = 0;
-    let len = program.len();
-    let mut i: usize = 0;
-    let mut action_index: usize = 0;
+fn process<const LEN: usize>(actions: Vec<String>) -> [i32; LEN] {
+    let mut arr = [1; LEN];
+    let mut ai = 0;
     let mut pause = false;
-    let mut q: VecDeque<i32> = VecDeque::from([0]);
-    while i <= target_cycle {
-        println!("Start : cycle {} register {}", i + 1, register);
-
-        let num = q.pop_front().expect("data");
-        register += num;
-        let action = program.get(action_index % len).expect("no data");
-        if action.starts_with("addx ") {
-            let splited: Vec<&str> = action.split("addx ").collect();
-            let num: i32 = splited
-                .get(1)
-                .expect("no data")
-                .parse()
-                .expect("cannot parse");
-            if q.is_empty() {
-                q.push_back(num);
-                action_index += 1;
+    let mut num = 0;
+    for i in 0..LEN {
+        if i > 0 {
+            arr[i] = arr[i - 1];
+        }
+        if !pause {
+            let action = actions.get(ai % actions.len()).expect("no data");
+            if action.starts_with("addx") {
+                let splited: Vec<&str> = action.split("addx ").collect();
+                num = splited
+                    .get(1)
+                    .expect("no data")
+                    .parse()
+                    .expect("parse error");
+                arr[i] += num;
+                pause = true;
+                ai += 1;
+            } else {
+                pause = false;
+                ai += 1;
             }
         } else {
-            action_index += 1;
+            pause = true;
         }
-        q.push_back(0);
-        println!("Finish: cycle {} register {}", i + 1, register);
-        i += 1;
     }
-    if !pause {
-        register += mem;
-    }
-    println!("----");
-    register
+    arr
 }
 
 #[cfg(test)]
@@ -99,58 +57,13 @@ mod tests {
 
     #[test]
     fn test_process() {
-        let program = load_file_to_string_vectors("src/solution/s10/small_example.txt");
-        assert_eq!(process(1, program), 1);
-        let program = load_file_to_string_vectors("src/solution/s10/small_example.txt");
-        assert_eq!(process(2, program), 1);
-        let program = load_file_to_string_vectors("src/solution/s10/small_example.txt");
-        assert_eq!(process(3, program), 4);
-        let program = load_file_to_string_vectors("src/solution/s10/small_example.txt");
-        assert_eq!(process(4, program), 4);
-        let program = load_file_to_string_vectors("src/solution/s10/small_example.txt");
-        assert_eq!(process(5, program), -1);
-        let program = load_file_to_string_vectors("src/solution/s10/small_example.txt");
-        assert_eq!(process(10, program), -3);
-        let program = load_file_to_string_vectors("src/solution/s10/example.txt");
-        assert_eq!(process(20, program), 21);
-        let program = load_file_to_string_vectors("src/solution/s10/example.txt");
-        assert_eq!(process(60, program), 19);
-        let program = load_file_to_string_vectors("src/solution/s10/example.txt");
-        assert_eq!(process(100, program), 18);
-        let program = load_file_to_string_vectors("src/solution/s10/example.txt");
-        assert_eq!(process(140, program), 21);
-        let program = load_file_to_string_vectors("src/solution/s10/example.txt");
-        assert_eq!(process(180, program), 16);
-        let program = load_file_to_string_vectors("src/solution/s10/example.txt");
-        assert_eq!(process(220, program), 18);
-    }
-
-    // #[test]
-    fn test_process2() {
-        let program = load_file_to_string_vectors("src/solution/s10/small_example.txt");
-        assert_eq!(process2(1, program), 1);
-        let program = load_file_to_string_vectors("src/solution/s10/small_example.txt");
-        assert_eq!(process2(2, program), 1);
-        let program = load_file_to_string_vectors("src/solution/s10/small_example.txt");
-        assert_eq!(process2(3, program), 4);
-        let program = load_file_to_string_vectors("src/solution/s10/small_example.txt");
-        assert_eq!(process2(4, program), 4);
-        let program = load_file_to_string_vectors("src/solution/s10/small_example.txt");
-        assert_eq!(process2(5, program), -1);
-        let program = load_file_to_string_vectors("src/solution/s10/small_example.txt");
-        assert_eq!(process2(10, program), -3);
-        let program = load_file_to_string_vectors("src/solution/s10/example.txt");
-        assert_eq!(process2(20, program), 21);
-        let program = load_file_to_string_vectors("src/solution/s10/example.txt");
-        assert_eq!(process2(60, program), 19);
-        let program = load_file_to_string_vectors("src/solution/s10/example.txt");
-        assert_eq!(process2(100, program), 18);
-        let program = load_file_to_string_vectors("src/solution/s10/example.txt");
-        assert_eq!(process2(140, program), 21);
-        let program = load_file_to_string_vectors("src/solution/s10/example.txt");
-        assert_eq!(process2(180, program), 16);
-        let program = load_file_to_string_vectors("src/solution/s10/example.txt");
-        assert_eq!(process2(220, program), 18);
+        let actions = load_file_to_string_vectors("src/solution/s10/small_example.txt");
+        let registers: [i32; 5] = process(actions);
+        assert_eq!(registers[0], 1);
+        assert_eq!(registers[1], 1);
+        assert_eq!(registers[2], 4);
+        assert_eq!(registers[3], 4);
+        assert_eq!(registers[4], -1);
     }
 
     #[test]
