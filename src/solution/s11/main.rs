@@ -67,15 +67,15 @@ fn parse_input_vec(input: Vec<String>) -> Vec<Monkey> {
 fn parse_monkey(input: String) -> Monkey {
     let re = Regex::new(
         r"Monkey ([\d]):
-  Starting items: ([\d\\,\\ ]+)
-  Operation: new = old (\+|\*) (old|[\d]+)
-  Test: divisible by ([\d]+)
-    If true: throw to monkey ([\d])
-    If false: throw to monkey ([\d])
-",
+\s+Starting items: ([\d\\,\\ ]+)
+\s+Operation: new = old (\+|\*) (old|[\d]+)
+\s+Test: divisible by ([\d]+)
+\s+If true: throw to monkey ([\d])
+\s+If false: throw to monkey ([\d])",
     )
     .unwrap();
-    println!("{}", input);
+    input.chars().for_each(|c| print!("{}", c));
+    println!("");
     let caps = re.captures(input.as_str()).unwrap();
     let id = caps.get(1).map_or("0", |m| m.as_str());
     let starting_items = caps.get(2).map_or("0", |m| m.as_str());
@@ -150,7 +150,8 @@ mod tests {
         assert_eq!(monkey.division, 13);
         assert_eq!(monkey.monkey_if_true, 1);
         assert_eq!(monkey.monkey_if_false, 3);
-        let input = "Monkey 0:
+        let input = "
+Monkey 0:
   Starting items: 89, 94, 94, 67
   Operation: new = old + 2
   Test: divisible by 19
