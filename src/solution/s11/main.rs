@@ -22,10 +22,7 @@ fn find_answer(input: Vec<String>, rounds: usize, divided_by_three: bool) -> usi
             let mut tmp: Vec<(usize, usize)> = vec![];
             for num in &monkey.items {
                 let mut out_num: usize = match monkey.operand {
-                    0 => match monkey.operation {
-                        Operation::Multiply => num * num,
-                        Operation::Add => num + num,
-                    },
+                    0 => num * num,
                     operand => match monkey.operation {
                         Operation::Multiply => num * operand,
                         Operation::Add => num + operand,
@@ -34,7 +31,7 @@ fn find_answer(input: Vec<String>, rounds: usize, divided_by_three: bool) -> usi
                 if divided_by_three {
                     out_num = out_num / 3
                 }
-                let target_monkey_id = match out_num % monkey.division {
+                let target_monkey_id = match out_num % monkey.divisor {
                     0 => monkey.monkey_if_true,
                     _ => monkey.monkey_if_false,
                 };
@@ -43,7 +40,13 @@ fn find_answer(input: Vec<String>, rounds: usize, divided_by_three: bool) -> usi
             monkey.clear();
             for (out_num, target_monkey_id) in tmp {
                 let target_monkey = monkeys.get_mut(target_monkey_id).expect("no data");
-                target_monkey.add_item(out_num)
+                // target_monkey.add_item(out_num);
+                match divided_by_three {
+                    true => target_monkey.add_item(out_num),
+                    false => target_monkey.add_item(
+                        out_num - ((out_num / target_monkey.divisor) * target_monkey.divisor),
+                    ),
+                }
             }
         }
         for m in &monkeys {
@@ -88,7 +91,7 @@ fn parse_monkey(input: String) -> Monkey {
     let starting_items = caps.get(2).map_or("0", |m| m.as_str());
     let operation = caps.get(3).map_or("0", |m| m.as_str());
     let operand = caps.get(4).map_or("0", |m| m.as_str());
-    let division = caps.get(5).map_or("0", |m| m.as_str());
+    let divisor = caps.get(5).map_or("0", |m| m.as_str());
     let monkey_if_true = caps.get(6).map_or("0", |m| m.as_str());
     let monkey_if_false = caps.get(7).map_or("0", |m| m.as_str());
     Monkey {
@@ -106,7 +109,7 @@ fn parse_monkey(input: String) -> Monkey {
             "old" => 0,
             v => v.parse().expect("parse error"),
         },
-        division: division.parse().expect("parse error"),
+        divisor: divisor.parse().expect("parse error"),
         monkey_if_true: monkey_if_true.parse().expect("parse error"),
         monkey_if_false: monkey_if_false.parse().expect("parse error"),
         inspect_times: 0,
@@ -118,7 +121,7 @@ struct Monkey {
     items: Vec<usize>,
     operation: Operation,
     operand: usize,
-    division: usize,
+    divisor: usize,
     monkey_if_true: usize,
     monkey_if_false: usize,
     inspect_times: usize,
@@ -161,7 +164,7 @@ mod tests {
         assert_eq!(monkey.items, vec![79, 60, 97]);
         assert_eq!(monkey.operation, Operation::Multiply);
         assert_eq!(monkey.operand, 0);
-        assert_eq!(monkey.division, 13);
+        assert_eq!(monkey.divisor, 13);
         assert_eq!(monkey.monkey_if_true, 1);
         assert_eq!(monkey.monkey_if_false, 3);
         let input = "
@@ -177,9 +180,19 @@ Monkey 0:
         assert_eq!(monkey.items, vec![89, 94, 94, 67]);
         assert_eq!(monkey.operation, Operation::Add);
         assert_eq!(monkey.operand, 2);
-        assert_eq!(monkey.division, 19);
+        assert_eq!(monkey.divisor, 19);
         assert_eq!(monkey.monkey_if_true, 7);
         assert_eq!(monkey.monkey_if_false, 0);
+    }
+
+    #[test]
+    fn test_find_answer() {
+        let input = load_file_split_two_lines("src/solution/s11/example.txt");
+        let ans = find_answer(input, 20, false);
+        assert_eq!(ans, 99 * 103);
+        let input = load_file_split_two_lines("src/solution/s11/example.txt");
+        let ans = find_answer(input, 1000, false);
+        assert_eq!(ans, 5204 * 5192);
     }
 
     #[test]
@@ -196,9 +209,9 @@ Monkey 0:
         //     solution_day11_part2(PathBuf::from("src/solution/s11/example.txt")),
         //     2713310158
         // );
-        assert_eq!(
-            solution_day11_part2(PathBuf::from("src/solution/s11/input.txt")),
-            0
-        );
+        // assert_eq!(
+        //     solution_day11_part2(PathBuf::from("src/solution/s11/input.txt")),
+        //     0
+        // );
     }
 }
