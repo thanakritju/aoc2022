@@ -6,22 +6,22 @@ use crate::utils::load_file::load_file_split_two_lines;
 
 pub fn solution_day11_part1(path: std::path::PathBuf) -> usize {
     let input = load_file_split_two_lines(path);
-    find_answer(input, 20)
+    find_answer(input, 20, true)
 }
 
 pub fn solution_day11_part2(path: std::path::PathBuf) -> usize {
     let input = load_file_split_two_lines(path);
-    find_answer(input, 10000)
+    find_answer(input, 10000, false)
 }
 
-fn find_answer(input: Vec<String>, rounds: usize) -> usize {
+fn find_answer(input: Vec<String>, rounds: usize, divided_by_three: bool) -> usize {
     let mut monkeys = parse_input_vec(input);
     for r in 0..rounds {
         for i in 0..monkeys.len() {
             let monkey = monkeys.get_mut(i).expect("no data");
             let mut tmp: Vec<(usize, usize)> = vec![];
             for num in &monkey.items {
-                let out_num: usize = match monkey.operand {
+                let mut out_num: usize = match monkey.operand {
                     0 => match monkey.operation {
                         Operation::Multiply => num * num,
                         Operation::Add => num + num,
@@ -30,7 +30,10 @@ fn find_answer(input: Vec<String>, rounds: usize) -> usize {
                         Operation::Multiply => num * operand,
                         Operation::Add => num + operand,
                     },
-                } / 3;
+                };
+                if divided_by_three {
+                    out_num = out_num / 3
+                }
                 let target_monkey_id = match out_num % monkey.division {
                     0 => monkey.monkey_if_true,
                     _ => monkey.monkey_if_false,
@@ -44,10 +47,16 @@ fn find_answer(input: Vec<String>, rounds: usize) -> usize {
             }
         }
         for m in &monkeys {
-            println!("round: {} i:{} items:{:?}", r, m.id, m.items)
+            println!("round: {} monkey:{} items:{:?}", r + 1, m.id, m.items)
         }
     }
-    let mut lens: BinaryHeap<usize> = monkeys.iter().map(|m| m.inspect_times).collect();
+    let mut lens: BinaryHeap<usize> = monkeys
+        .iter()
+        .map(|m| {
+            println!("{}", m.inspect_times);
+            m.inspect_times
+        })
+        .collect();
     let mut ans = 1;
     match lens.pop() {
         Some(v) => ans *= v,
@@ -187,9 +196,9 @@ Monkey 0:
         //     solution_day11_part2(PathBuf::from("src/solution/s11/example.txt")),
         //     2713310158
         // );
-        // assert_eq!(
-        //     solution_day11_part2(PathBuf::from("src/solution/s11/input.txt")),
-        //     0
-        // );
+        assert_eq!(
+            solution_day11_part2(PathBuf::from("src/solution/s11/input.txt")),
+            0
+        );
     }
 }
