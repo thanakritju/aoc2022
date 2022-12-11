@@ -21,7 +21,7 @@ fn find_answer(input: Vec<String>, rounds: usize) -> usize {
             let monkey = monkeys.get_mut(i).expect("no data");
             let mut tmp: Vec<(usize, usize)> = vec![];
             for num in &monkey.items {
-                let out_num: usize = (match monkey.operand {
+                let out_num: usize = match monkey.operand {
                     0 => match monkey.operation {
                         Operation::Multiply => num * num,
                         Operation::Add => num + num,
@@ -30,9 +30,7 @@ fn find_answer(input: Vec<String>, rounds: usize) -> usize {
                         Operation::Multiply => num * operand,
                         Operation::Add => num + operand,
                     },
-                } / 3)
-                    .try_into()
-                    .unwrap();
+                } / 3;
                 let target_monkey_id = match out_num % monkey.division {
                     0 => monkey.monkey_if_true,
                     _ => monkey.monkey_if_false,
