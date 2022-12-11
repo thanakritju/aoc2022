@@ -6,14 +6,23 @@ use crate::utils::load_file::load_file_split_two_lines;
 
 pub fn solution_day11_part1(path: std::path::PathBuf) -> usize {
     let input = load_file_split_two_lines(path);
+    find_answer(input, 20)
+}
+
+pub fn solution_day11_part2(path: std::path::PathBuf) -> usize {
+    let input = load_file_split_two_lines(path);
+    find_answer(input, 10000)
+}
+
+fn find_answer(input: Vec<String>, rounds: usize) -> usize {
     let mut monkeys = parse_input_vec(input);
-    for _ in 0..20 {
+    for r in 0..rounds {
         for i in 0..monkeys.len() {
             let monkey = monkeys.get_mut(i).expect("no data");
-            let mut tmp: Vec<(i32, usize)> = vec![];
+            let mut tmp: Vec<(usize, usize)> = vec![];
             for num in &monkey.items {
-                let out_num = match monkey.operand {
-                    -1 => match monkey.operation {
+                let out_num: usize = (match monkey.operand {
+                    0 => match monkey.operation {
                         Operation::Multiply => num * num,
                         Operation::Add => num + num,
                     },
@@ -21,20 +30,26 @@ pub fn solution_day11_part1(path: std::path::PathBuf) -> usize {
                         Operation::Multiply => num * operand,
                         Operation::Add => num + operand,
                     },
-                };
+                } / 3)
+                    .try_into()
+                    .unwrap();
                 let target_monkey_id = match out_num % monkey.division {
                     0 => monkey.monkey_if_true,
                     _ => monkey.monkey_if_false,
                 };
                 tmp.push((out_num, target_monkey_id));
             }
+            monkey.clear();
             for (out_num, target_monkey_id) in tmp {
                 let target_monkey = monkeys.get_mut(target_monkey_id).expect("no data");
                 target_monkey.add_item(out_num)
             }
         }
+        for m in &monkeys {
+            println!("round: {} i:{} items:{:?}", r, m.id, m.items)
+        }
     }
-    let mut lens: BinaryHeap<usize> = monkeys.iter().map(|m| m.items.len()).collect();
+    let mut lens: BinaryHeap<usize> = monkeys.iter().map(|m| m.inspect_times).collect();
     let mut ans = 1;
     match lens.pop() {
         Some(v) => ans *= v,
@@ -46,19 +61,6 @@ pub fn solution_day11_part1(path: std::path::PathBuf) -> usize {
     }
     ans
 }
-
-pub fn solution_day11_part2(path: std::path::PathBuf) -> i32 {
-    0
-}
-
-// fn parse_input<const LEN: usize>(input: Vec<String>) -> [Monkey; LEN] {
-//     let mut arr = [Monkey::new(); LEN];
-//     for (i, line) in input.iter().enumerate() {
-//         let monkey = parse_monkey(line.to_string());
-//         arr[i] = monkey
-//     }
-//     arr
-// }
 
 fn parse_input_vec(input: Vec<String>) -> Vec<Monkey> {
     input.iter().map(|s| parse_monkey(s.to_string())).collect()
@@ -74,8 +76,6 @@ fn parse_monkey(input: String) -> Monkey {
 \s+If false: throw to monkey ([\d])",
     )
     .unwrap();
-    input.chars().for_each(|c| print!("{}", c));
-    println!("");
     let caps = re.captures(input.as_str()).unwrap();
     let id = caps.get(1).map_or("0", |m| m.as_str());
     let starting_items = caps.get(2).map_or("0", |m| m.as_str());
@@ -96,32 +96,39 @@ fn parse_monkey(input: String) -> Monkey {
             o => panic!("not regonized operation: {}", o),
         },
         operand: match operand {
-            "old" => -1,
+            "old" => 0,
             v => v.parse().expect("parse error"),
         },
         division: division.parse().expect("parse error"),
         monkey_if_true: monkey_if_true.parse().expect("parse error"),
         monkey_if_false: monkey_if_false.parse().expect("parse error"),
+        inspect_times: 0,
     }
 }
 
 struct Monkey {
     id: usize,
-    items: Vec<i32>,
+    items: Vec<usize>,
     operation: Operation,
-    operand: i32,
-    division: i32,
+    operand: usize,
+    division: usize,
     monkey_if_true: usize,
     monkey_if_false: usize,
+    inspect_times: usize,
 }
 
 impl Monkey {
-    pub fn add_item(&mut self, item: i32) {
+    pub fn add_item(&mut self, item: usize) {
         self.items.push(item);
+    }
+
+    pub fn clear(&mut self) {
+        self.inspect_times += self.items.len();
+        self.items = vec![]
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 enum Operation {
     Multiply,
     Add,
@@ -146,7 +153,7 @@ mod tests {
         assert_eq!(monkey.id, 2);
         assert_eq!(monkey.items, vec![79, 60, 97]);
         assert_eq!(monkey.operation, Operation::Multiply);
-        assert_eq!(monkey.operand, -1);
+        assert_eq!(monkey.operand, 0);
         assert_eq!(monkey.division, 13);
         assert_eq!(monkey.monkey_if_true, 1);
         assert_eq!(monkey.monkey_if_false, 3);
@@ -172,15 +179,15 @@ Monkey 0:
     fn test_solution() {
         assert_eq!(
             solution_day11_part1(PathBuf::from("src/solution/s11/example.txt")),
-            0
+            10605
         );
         assert_eq!(
             solution_day11_part1(PathBuf::from("src/solution/s11/input.txt")),
-            0
+            55944
         );
         assert_eq!(
             solution_day11_part2(PathBuf::from("src/solution/s11/example.txt")),
-            0
+            2713310158
         );
         assert_eq!(
             solution_day11_part2(PathBuf::from("src/solution/s11/input.txt")),
