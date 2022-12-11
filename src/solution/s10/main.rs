@@ -11,8 +11,24 @@ pub fn solution_day10_part1(path: std::path::PathBuf) -> i32 {
         .sum()
 }
 
-pub fn solution_day10_part2(path: std::path::PathBuf) -> i32 {
-    0
+pub fn solution_day10_part2(path: std::path::PathBuf) -> String {
+    let input = load_file_to_string_vectors(path);
+    let registers: [i32; 241] = process(input);
+    println!("{:?}", registers);
+    let mut ans = "".to_string();
+    for i in 0..6 {
+        let mut line = "\n".to_string();
+        for j in 0..40 {
+            let sprite_loc = registers[40 * i + j];
+            if j as i32 <= sprite_loc + 1 && j as i32 >= sprite_loc - 1 {
+                line = format!("{}{}", line, "#")
+            } else {
+                line = format!("{}{}", line, ".")
+            }
+        }
+        ans = format!("{}{}", ans, line)
+    }
+    ans
 }
 
 fn signal_strength(register: i32, cycle: i32) -> i32 {
@@ -28,7 +44,6 @@ fn process<const LEN: usize>(actions: Vec<String>) -> [i32; LEN] {
         if i > 0 {
             arr[i] = arr[i - 1];
         }
-        println!("{} {:?}", i, q);
         let n = q.pop_front().expect("No data");
         arr[i] = arr[i] + n;
 
@@ -93,11 +108,25 @@ mod tests {
         );
         assert_eq!(
             solution_day10_part2(PathBuf::from("src/solution/s10/example.txt")),
-            0
+            "
+##..##..##..##..##..##..##..##..##..##..
+###...###...###...###...###...###...###.
+####....####....####....####....####....
+#####.....#####.....#####.....#####.....
+######......######......######......####
+#######.......#######.......#######....."
+                .to_string()
         );
         assert_eq!(
             solution_day10_part2(PathBuf::from("src/solution/s10/input.txt")),
-            0
+            "
+####.####.###..###..###..####.####.####.
+#.......#.#..#.#..#.#..#.#.......#.#....
+###....#..###..#..#.###..###....#..###..
+#.....#...#..#.###..#..#.#.....#...#....
+#....#....#..#.#....#..#.#....#....#....
+#....####.###..#....###..#....####.#...."
+                .to_string()
         );
     }
 }
