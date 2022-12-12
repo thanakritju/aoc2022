@@ -41,7 +41,6 @@ fn search(
     while !queue.is_empty() {
         let (i, j, d) = queue.pop().expect("no data");
         if (i, j) == end {
-            println!("end x {} y {} d {}", i, j, d);
             if d < ans {
                 ans = d;
             }
@@ -54,7 +53,6 @@ fn search(
             if !is_visited && nh <= 1 + h {
                 queue.push((ni, nj, d + 1));
                 visited.insert((ni, nj));
-                println!("visited x {} y {} d {}", i, j, d);
             }
         }
         queue.sort_by(|a, b| b.2.cmp(&a.2));
@@ -79,8 +77,34 @@ pub fn get_neighbors(width: usize, height: usize, i: usize, j: usize) -> Vec<(us
     vec
 }
 
-pub fn solution_day12_part2(path: std::path::PathBuf) -> i32 {
-    0
+pub fn solution_day12_part2(path: std::path::PathBuf) -> usize {
+    let input = load_file_to_string_vectors(path);
+    let width = input.get(0).expect("No data").len();
+    let height = input.len();
+    let mut grid_raw = vec![0; width * height];
+    let mut grid_base: Vec<_> = grid_raw.as_mut_slice().chunks_mut(width).collect();
+    let grid = grid_base.as_mut_slice();
+    let mut starts = vec![];
+    let mut end = (0, 0);
+    for (j, line) in input.iter().enumerate() {
+        for (i, c) in line.chars().enumerate() {
+            if c == 'E' {
+                end = (i, j);
+            }
+            if c == 'S' || c == 'a' {
+                starts.push((i, j));
+            }
+            grid[j][i] = char_to_num(c);
+        }
+    }
+    let mut min = MAX;
+    for each in starts {
+        let out = search(each, end, width, height, grid);
+        if out < min {
+            min = out
+        }
+    }
+    min
 }
 
 fn char_to_num(c: char) -> usize {
@@ -117,7 +141,7 @@ mod tests {
         );
         assert_eq!(
             solution_day12_part2(PathBuf::from("src/solution/s12/input.txt")),
-            0
+            388
         );
     }
 }
