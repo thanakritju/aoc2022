@@ -40,19 +40,18 @@ pub fn solution_day12_part1(path: std::path::PathBuf) -> i32 {
                 ans = d;
             }
         }
-        // println!("x {} y {} d {}", i, j, d);
         let h = grid[j][i];
 
-        let mut neighbors = get_neighbors(width, height, i, j);
-        neighbors.sort_by(|(ai, aj), (bi, bj)| grid[*aj][*ai].cmp(&grid[*bj][*bi]));
-        for (ni, nj) in neighbors {
+        for (ni, nj) in get_neighbors(width, height, i, j) {
             let nh = grid[nj][ni];
             let is_visited = visited.get(&(ni, nj)).is_some();
             if !is_visited && nh <= 1 + h {
                 queue.push((ni, nj, d + 1));
                 visited.insert((ni, nj));
+                println!("visited x {} y {} d {}", i, j, d);
             }
         }
+        queue.sort_by(|a, b| b.2.cmp(&a.2));
     }
     ans.try_into().unwrap()
 }
@@ -104,11 +103,11 @@ mod tests {
         );
         assert_eq!(
             solution_day12_part1(PathBuf::from("src/solution/s12/input.txt")),
-            0
+            394
         );
         assert_eq!(
             solution_day12_part2(PathBuf::from("src/solution/s12/example.txt")),
-            0
+            29
         );
         assert_eq!(
             solution_day12_part2(PathBuf::from("src/solution/s12/input.txt")),
