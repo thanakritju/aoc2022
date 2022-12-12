@@ -2,7 +2,7 @@ use std::{collections::HashSet, usize::MAX};
 
 use crate::utils::load_file::load_file_to_string_vectors;
 
-pub fn solution_day12_part1(path: std::path::PathBuf) -> i32 {
+pub fn solution_day12_part1(path: std::path::PathBuf) -> usize {
     let input = load_file_to_string_vectors(path);
     let width = input.get(0).expect("No data").len();
     let height = input.len();
@@ -22,10 +22,16 @@ pub fn solution_day12_part1(path: std::path::PathBuf) -> i32 {
             grid[j][i] = char_to_num(c);
         }
     }
-    println!(
-        "start {:?} end {:?} height {} width {}",
-        start, end, height, width
-    );
+    search(start, end, width, height, grid)
+}
+
+fn search(
+    start: (usize, usize),
+    end: (usize, usize),
+    width: usize,
+    height: usize,
+    grid: &mut [&mut [usize]],
+) -> usize {
     let mut visited: HashSet<(usize, usize)> = Default::default();
     let mut queue: Vec<(usize, usize, usize)> = Default::default();
     let (x, y) = start;
@@ -53,7 +59,7 @@ pub fn solution_day12_part1(path: std::path::PathBuf) -> i32 {
         }
         queue.sort_by(|a, b| b.2.cmp(&a.2));
     }
-    ans.try_into().unwrap()
+    ans
 }
 
 pub fn get_neighbors(width: usize, height: usize, i: usize, j: usize) -> Vec<(usize, usize)> {
