@@ -5,10 +5,10 @@ pub enum GrammarItem {
     Paren,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ParseNode {
     pub children: Vec<ParseNode>,
-    pub value: u8,
+    pub value: Option<u8>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -22,7 +22,7 @@ impl ParseNode {
     pub fn new() -> ParseNode {
         ParseNode {
             children: Vec::new(),
-            value: 0,
+            value: None,
         }
     }
 }
@@ -43,7 +43,7 @@ pub fn parse(input: &String) -> Result<ParseNode, String> {
 
 fn parse_expr(tokens: &Vec<LexItem>, pos: usize) -> Result<(ParseNode, usize), String> {
     let c = tokens.get(pos);
-    Ok((ParseNode::new(), 0))
+    Ok((ParseNode::new(), 2))
 }
 
 fn lex(input: &String) -> Result<Vec<LexItem>, String> {
@@ -88,6 +88,12 @@ mod tests {
     #[test]
     fn test_get_number() {
         assert_eq!(get_number('1'), 1);
+    }
+
+    #[test]
+    fn test_parse() {
+        let string = String::from("[]");
+        assert_eq!(parse(&string).unwrap(), ParseNode::new());
     }
 
     #[test]
