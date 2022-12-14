@@ -239,6 +239,11 @@ mod tests {
             solution_day14_part2(PathBuf::from("src/solution/s14/example.txt")),
             93
         );
+    }
+
+    #[ignore]
+    #[test]
+    fn test_slow_solution() {
         assert_eq!(
             solution_day14_part2(PathBuf::from("src/solution/s14/input.txt")),
             29076
