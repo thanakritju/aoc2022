@@ -32,14 +32,6 @@ struct Node {
     children: Vec<Rc<RefCell<Node>>>,
 }
 
-fn read_node(text: String, mut index: &i32) -> Node {}
-
-impl Node {
-    pub fn new(s: String) -> Node {
-        return read_node(s, &0);
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
