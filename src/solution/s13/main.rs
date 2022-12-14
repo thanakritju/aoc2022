@@ -38,6 +38,7 @@ mod tests {
 
     use super::*;
 
+    #[ignore]
     #[test]
     fn test_are_in_right_order() {
         assert_eq!(
@@ -77,6 +78,7 @@ mod tests {
         );
     }
 
+    #[ignore]
     #[test]
     fn test_solution() {
         assert_eq!(
