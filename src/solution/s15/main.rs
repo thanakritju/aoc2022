@@ -9,6 +9,58 @@ pub fn solution_day15_part1(path: std::path::PathBuf) -> usize {
     get_number(input, 2000000)
 }
 
+pub fn solution_day15_part2(path: std::path::PathBuf) -> i32 {
+    let input = load_file_to_string_vectors(path);
+    let sabs: Vec<SensorAndBeacon> = input
+        .into_iter()
+        .map(|s| s.parse().expect("can't parse"))
+        .collect();
+    let mut found = false;
+    let mut x = 0;
+    let mut y = 0;
+    for row in 1..4000000 {
+        let mut vec = vec![];
+        for sab in &sabs {
+            match get_lower_bound_and_upper_bound(*sab, row) {
+                Some(x) => vec.push(x),
+                None => {}
+            }
+        }
+        if vec.is_empty() {
+            continue;
+        }
+        vec.sort_by(|a, b| b.0.cmp(&a.0));
+        while !vec.is_empty() {
+            let last = vec.pop().unwrap();
+            let second_last = vec.pop().unwrap();
+            match merge(last, second_last) {
+                Some(p) => {
+                    if vec.is_empty() {
+                    } else {
+                        vec.push(p);
+                    }
+                }
+                None => {
+                    if last.1 + 2 == second_last.0 {
+                        found = true;
+                        x = last.1 + 1;
+                        y = row;
+                        break;
+                    }
+                    if vec.is_empty() {
+                    } else {
+                        vec.push(second_last);
+                    }
+                }
+            }
+        }
+        if found {
+            break;
+        }
+    }
+    4000000 * x + y
+}
+
 fn get_number(input: Vec<String>, row: i32) -> usize {
     let mut vec = vec![];
     for line in input {
@@ -18,13 +70,48 @@ fn get_number(input: Vec<String>, row: i32) -> usize {
             None => {}
         }
     }
-    vec.sort_by(|a, b| b.0.cmp(&a.1));
     let mut count = 0;
-    count
+    vec.sort_by(|a, b| b.0.cmp(&a.0));
+    while !vec.is_empty() {
+        let last = vec.pop().unwrap();
+        let second_last = vec.pop().unwrap();
+        match merge(last, second_last) {
+            Some(p) => {
+                if vec.is_empty() {
+                    count += p.1 - p.0 + 1;
+                } else {
+                    vec.push(p);
+                }
+            }
+            None => {
+                count += last.1 - last.0 + 1;
+                if vec.is_empty() {
+                    count += second_last.1 - second_last.0 + 1;
+                } else {
+                    vec.push(second_last)
+                }
+            }
+        }
+    }
+    count.try_into().unwrap()
 }
 
-pub fn solution_day15_part2(path: std::path::PathBuf) -> i32 {
-    0
+fn merge(p1: (i32, i32), p2: (i32, i32)) -> Option<(i32, i32)> {
+    if p1.0 <= p2.0 && p1.1 >= p2.0 {
+        if p1.1 >= p2.1 {
+            return Some(p1);
+        } else {
+            return Some((p1.0, p2.1));
+        }
+    }
+    if p2.0 <= p1.0 && p2.1 >= p1.0 {
+        if p1.1 <= p2.1 {
+            return Some(p2);
+        } else {
+            return Some((p2.0, p1.1));
+        }
+    }
+    None
 }
 
 fn how_many_in_the_territory(sab: SensorAndBeacon, row: i32) -> usize {
@@ -62,25 +149,6 @@ fn get_lower_bound_and_upper_bound(sab: SensorAndBeacon, row: i32) -> Option<(i3
         }
     }
     Some((dx_start, dx_end))
-}
-
-fn get_those_in_territory(sab: SensorAndBeacon, row: i32) -> HashSet<(i32, i32)> {
-    let mut set: HashSet<(i32, i32)> = Default::default();
-    let d = sab.distance();
-    let dy = (sab.1 - row).abs();
-    let dx = d - dy;
-    if dx <= 0 {
-        return set;
-    }
-    let dx_start = sab.0 - dx;
-    let dx_end = sab.0 + dx;
-    for x in dx_start..dx_end + 1 {
-        if x == sab.2 && row == sab.3 {
-        } else {
-            set.insert((x, row));
-        }
-    }
-    set
 }
 
 #[derive(Eq, Hash, Debug, PartialEq, Clone, Copy)]
@@ -127,24 +195,15 @@ mod tests {
     }
 
     #[test]
-    fn test_get_those_in_territory() {
-        assert_eq!(
-            get_those_in_territory(SensorAndBeacon(8, 7, 2, 10), 10),
-            HashSet::from([
-                (3, 10),
-                (4, 10),
-                (5, 10),
-                (6, 10),
-                (7, 10),
-                (8, 10),
-                (9, 10),
-                (10, 10),
-                (11, 10),
-                (12, 10),
-                (13, 10),
-                (14, 10)
-            ])
-        );
+    fn test_merge() {
+        assert_eq!(merge((1, 10), (1, 5)), Some((1, 10)));
+        assert_eq!(merge((1, 10), (1, 15)), Some((1, 15)));
+        assert_eq!(merge((1, 10), (-5, 15)), Some((-5, 15)));
+        assert_eq!(merge((1, 10), (-5, 3)), Some((-5, 10)));
+        assert_eq!(merge((1, 10), (8, 15)), Some((1, 15)));
+        assert_eq!(merge((1, 10), (10, 15)), Some((1, 15)));
+        assert_eq!(merge((1, 10), (11, 15)), None);
+        assert_eq!(merge((16, 20), (11, 15)), None);
     }
 
     #[test]
@@ -197,18 +256,20 @@ mod tests {
     fn test_get_number() {
         let input = load_file_to_string_vectors("src/solution/s15/example.txt");
         assert_eq!(get_number(input, 10), 26);
+        let input = load_file_to_string_vectors("src/solution/s15/example.txt");
+        assert_eq!(get_number(input, 3), 30);
     }
 
     #[test]
     fn test_solution() {
         assert_eq!(
             solution_day15_part1(PathBuf::from("src/solution/s15/input.txt")),
-            0
+            5144286
         );
-        // assert_eq!(
-        //     solution_day15_part2(PathBuf::from("src/solution/s15/example.txt")),
-        //     0
-        // );
+        assert_eq!(
+            solution_day15_part2(PathBuf::from("src/solution/s15/example.txt")),
+            56000011
+        );
         // assert_eq!(
         //     solution_day15_part2(PathBuf::from("src/solution/s15/input.txt")),
         //     0

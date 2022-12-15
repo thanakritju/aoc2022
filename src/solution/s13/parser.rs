@@ -42,28 +42,27 @@ pub fn parse(input: &String) -> Result<ParseNode, String> {
 }
 
 fn parse_expr(tokens: &Vec<LexItem>, pos: usize) -> Result<(ParseNode, usize), String> {
+    let (mut node, next_pos) = parse_expr(tokens, pos)?;
     let c = tokens.get(pos);
-    let mut node = ParseNode::new();
     match c {
         Some(lexItem) => match lexItem {
             LexItem::Paren('[') => {
-                let (child, _) = parse_expr(tokens, pos + 1).unwrap();
-                node.children.push(child)
+                let (rhs, i) = parse_expr(tokens, next_pos + 1)?;
+                node.children.push(rhs);
+                Ok((node, i))
             }
-            LexItem::Paren(']') => return Ok((node, pos + 1)),
-            LexItem::Comma(',') => {
-                pos = pos + 1;
-            }
+            LexItem::Paren(']') => Ok((node, next_pos)),
+            LexItem::Comma(',') => Ok((node, next_pos + 1)),
             LexItem::Num(n) => {
                 let mut child = ParseNode::new();
                 child.value = Some(*n);
-                node.children.push(child)
+                node.children.push(child);
+                Ok((node, next_pos))
             }
             _ => panic!("unregonized data"),
         },
-        None => {}
-    };
-    Ok((node, pos + 1))
+        None => Ok((node, next_pos)),
+    }
 }
 
 fn lex(input: &String) -> Result<Vec<LexItem>, String> {
