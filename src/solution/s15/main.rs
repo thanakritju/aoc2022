@@ -13,13 +13,13 @@ fn get_number(input: Vec<String>, row: i32) -> usize {
     // let mut set: HashSet<(i32, i32)> = Default::default();
     // for line in input {
     //     let sab = line.parse::<SensorAndBeacon>().unwrap();
-    //     set.extend(get_those_in_teritory(sab, row))
+    //     set.extend(get_those_in_territory(sab, row))
     // }
     // set.len()
     let mut count = 0;
     for line in input {
         let sab = line.parse::<SensorAndBeacon>().unwrap();
-        count += how_many_in_the_teritory(sab, row)
+        count += how_many_in_the_territory(sab, row)
     }
     count
 }
@@ -28,7 +28,7 @@ pub fn solution_day15_part2(path: std::path::PathBuf) -> i32 {
     0
 }
 
-fn how_many_in_the_teritory(sab: SensorAndBeacon, row: i32) -> usize {
+fn how_many_in_the_territory(sab: SensorAndBeacon, row: i32) -> usize {
     let mut count = 0;
     let d = sab.distance();
     let dy = (sab.1 - row).abs();
@@ -45,7 +45,27 @@ fn how_many_in_the_teritory(sab: SensorAndBeacon, row: i32) -> usize {
     count.try_into().unwrap()
 }
 
-fn get_those_in_teritory(sab: SensorAndBeacon, row: i32) -> HashSet<(i32, i32)> {
+fn get_lower_bound_and_upper_bound(sab: SensorAndBeacon, row: i32) -> Option<(i32, i32)> {
+    let d = sab.distance();
+    let dy = (sab.1 - row).abs();
+    let dx = d - dy;
+    if dx <= 0 {
+        return None;
+    }
+    let mut dx_start = sab.0 - dx;
+    let mut dx_end = sab.0 + dx;
+    if row == sab.3 {
+        if sab.2 == dx_start {
+            dx_start += 1
+        }
+        if sab.2 == dx_end {
+            dx_end -= 1
+        }
+    }
+    Some((dx_start, dx_end))
+}
+
+fn get_those_in_territory(sab: SensorAndBeacon, row: i32) -> HashSet<(i32, i32)> {
     let mut set: HashSet<(i32, i32)> = Default::default();
     let d = sab.distance();
     let dy = (sab.1 - row).abs();
@@ -108,9 +128,9 @@ mod tests {
     }
 
     #[test]
-    fn test_get_those_in_teritory() {
+    fn test_get_those_in_territory() {
         assert_eq!(
-            get_those_in_teritory(SensorAndBeacon(8, 7, 2, 10), 10),
+            get_those_in_territory(SensorAndBeacon(8, 7, 2, 10), 10),
             HashSet::from([
                 (3, 10),
                 (4, 10),
@@ -129,25 +149,37 @@ mod tests {
     }
 
     #[test]
-    fn test_how_many_in_the_teritory() {
+    fn test_get_lower_bound_and_upper_bound() {
         assert_eq!(
-            how_many_in_the_teritory(SensorAndBeacon(8, 7, 2, 10), 10),
+            get_lower_bound_and_upper_bound(SensorAndBeacon(8, 7, 2, 10), 10),
+            Some((3, 14))
+        );
+        assert_eq!(
+            get_lower_bound_and_upper_bound(SensorAndBeacon(8, 7, 14, 10), 10),
+            Some((2, 13))
+        );
+    }
+
+    #[test]
+    fn test_how_many_in_the_territory() {
+        assert_eq!(
+            how_many_in_the_territory(SensorAndBeacon(8, 7, 2, 10), 10),
             12
         );
         assert_eq!(
-            how_many_in_the_teritory(SensorAndBeacon(8, 7, 14, 10), 10),
+            how_many_in_the_territory(SensorAndBeacon(8, 7, 14, 10), 10),
             12
         );
         assert_eq!(
-            how_many_in_the_teritory(SensorAndBeacon(8, 7, 2, 10), 17),
+            how_many_in_the_territory(SensorAndBeacon(8, 7, 2, 10), 17),
             0
         );
         assert_eq!(
-            how_many_in_the_teritory(SensorAndBeacon(0, 11, 2, 10), 10),
+            how_many_in_the_territory(SensorAndBeacon(0, 11, 2, 10), 10),
             4
         );
         assert_eq!(
-            how_many_in_the_teritory(SensorAndBeacon(8, 7, 2, 10), 9),
+            how_many_in_the_territory(SensorAndBeacon(8, 7, 2, 10), 9),
             15
         );
     }
