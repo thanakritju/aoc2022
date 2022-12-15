@@ -10,17 +10,16 @@ pub fn solution_day15_part1(path: std::path::PathBuf) -> usize {
 }
 
 fn get_number(input: Vec<String>, row: i32) -> usize {
-    // let mut set: HashSet<(i32, i32)> = Default::default();
-    // for line in input {
-    //     let sab = line.parse::<SensorAndBeacon>().unwrap();
-    //     set.extend(get_those_in_territory(sab, row))
-    // }
-    // set.len()
-    let mut count = 0;
+    let mut vec = vec![];
     for line in input {
         let sab = line.parse::<SensorAndBeacon>().unwrap();
-        count += how_many_in_the_territory(sab, row)
+        match get_lower_bound_and_upper_bound(sab, row) {
+            Some(x) => vec.push(x),
+            None => {}
+        }
     }
+    vec.sort_by(|a, b| b.0.cmp(&a.1));
+    let mut count = 0;
     count
 }
 

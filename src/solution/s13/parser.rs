@@ -43,7 +43,27 @@ pub fn parse(input: &String) -> Result<ParseNode, String> {
 
 fn parse_expr(tokens: &Vec<LexItem>, pos: usize) -> Result<(ParseNode, usize), String> {
     let c = tokens.get(pos);
-    Ok((ParseNode::new(), 2))
+    let mut node = ParseNode::new();
+    match c {
+        Some(lexItem) => match lexItem {
+            LexItem::Paren('[') => {
+                let (child, _) = parse_expr(tokens, pos + 1).unwrap();
+                node.children.push(child)
+            }
+            LexItem::Paren(']') => return Ok((node, pos + 1)),
+            LexItem::Comma(',') => {
+                pos = pos + 1;
+            }
+            LexItem::Num(n) => {
+                let mut child = ParseNode::new();
+                child.value = Some(*n);
+                node.children.push(child)
+            }
+            _ => panic!("unregonized data"),
+        },
+        None => {}
+    };
+    Ok((node, pos + 1))
 }
 
 fn lex(input: &String) -> Result<Vec<LexItem>, String> {
@@ -94,6 +114,10 @@ mod tests {
     fn test_parse() {
         let string = String::from("[]");
         assert_eq!(parse(&string).unwrap(), ParseNode::new());
+        let string = String::from("[4]");
+        let mut n = ParseNode::new();
+        n.value = Some(4);
+        assert_eq!(parse(&string).unwrap(), n);
     }
 
     #[test]
