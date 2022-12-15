@@ -9,12 +9,16 @@ pub fn solution_day15_part1(path: std::path::PathBuf) -> usize {
     get_number(input, 2000000)
 }
 
-pub fn solution_day15_part2(path: std::path::PathBuf) -> i32 {
+pub fn solution_day15_part2(path: std::path::PathBuf) -> usize {
     let input = load_file_to_string_vectors(path);
     let sabs: Vec<SensorAndBeacon> = input
         .into_iter()
         .map(|s| s.parse().expect("can't parse"))
         .collect();
+    let mut beacons: HashSet<(i32, i32)> = Default::default();
+    for sab in &sabs {
+        beacons.insert((sab.2, sab.3));
+    }
     let mut found = false;
     let mut x = 0;
     let mut y = 0;
@@ -41,7 +45,7 @@ pub fn solution_day15_part2(path: std::path::PathBuf) -> i32 {
                     }
                 }
                 None => {
-                    if last.1 + 2 == second_last.0 {
+                    if last.1 + 2 == second_last.0 && beacons.get(&(last.1 + 1, row)).is_none() {
                         found = true;
                         x = last.1 + 1;
                         y = row;
@@ -58,7 +62,9 @@ pub fn solution_day15_part2(path: std::path::PathBuf) -> i32 {
             break;
         }
     }
-    4000000 * x + y
+    let usize_x: usize = x.try_into().unwrap();
+    let usize_y: usize = y.try_into().unwrap();
+    4000000 * usize_x + usize_y
 }
 
 fn get_number(input: Vec<String>, row: i32) -> usize {
@@ -112,23 +118,6 @@ fn merge(p1: (i32, i32), p2: (i32, i32)) -> Option<(i32, i32)> {
         }
     }
     None
-}
-
-fn how_many_in_the_territory(sab: SensorAndBeacon, row: i32) -> usize {
-    let mut count = 0;
-    let d = sab.distance();
-    let dy = (sab.1 - row).abs();
-    let dx = d - dy;
-    if dx <= 0 {
-        return 0;
-    }
-    let dx_start = sab.0 - dx;
-    let dx_end = sab.0 + dx;
-    count += 2 * dx + 1;
-    if row == sab.3 && (sab.2 == dx_start || sab.2 == dx_end) {
-        count -= 1;
-    }
-    count.try_into().unwrap()
 }
 
 fn get_lower_bound_and_upper_bound(sab: SensorAndBeacon, row: i32) -> Option<(i32, i32)> {
@@ -219,30 +208,6 @@ mod tests {
     }
 
     #[test]
-    fn test_how_many_in_the_territory() {
-        assert_eq!(
-            how_many_in_the_territory(SensorAndBeacon(8, 7, 2, 10), 10),
-            12
-        );
-        assert_eq!(
-            how_many_in_the_territory(SensorAndBeacon(8, 7, 14, 10), 10),
-            12
-        );
-        assert_eq!(
-            how_many_in_the_territory(SensorAndBeacon(8, 7, 2, 10), 17),
-            0
-        );
-        assert_eq!(
-            how_many_in_the_territory(SensorAndBeacon(0, 11, 2, 10), 10),
-            4
-        );
-        assert_eq!(
-            how_many_in_the_territory(SensorAndBeacon(8, 7, 2, 10), 9),
-            15
-        );
-    }
-
-    #[test]
     fn test_parse() {
         assert_eq!(
             "Sensor at x=60149, y=3320681: closest beacon is at x=-278961, y=3326224"
@@ -270,9 +235,14 @@ mod tests {
             solution_day15_part2(PathBuf::from("src/solution/s15/example.txt")),
             56000011
         );
-        // assert_eq!(
-        //     solution_day15_part2(PathBuf::from("src/solution/s15/input.txt")),
-        //     0
-        // );
+    }
+
+    #[ignore = "slow test"]
+    #[test]
+    fn test_slow_solution() {
+        assert_eq!(
+            solution_day15_part2(PathBuf::from("src/solution/s15/input.txt")),
+            10229191267339
+        );
     }
 }
