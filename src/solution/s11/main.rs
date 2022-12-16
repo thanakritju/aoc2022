@@ -21,7 +21,7 @@ fn find_answer(input: Vec<String>, rounds: usize, divided_by_three: bool) -> usi
         .map(|m| m.divisor)
         .reduce(|d1, d2| d1 * d2)
         .expect("no data");
-    for r in 0..rounds {
+    for _ in 0..rounds {
         for i in 0..monkeys.len() {
             let monkey = monkeys.get_mut(i).expect("no data");
             let mut tmp: Vec<(usize, usize)> = vec![];
