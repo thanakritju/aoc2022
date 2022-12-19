@@ -30,20 +30,24 @@ fn find_next_valve(
     let target_valve = valves.get(&starting_node).unwrap().clone();
 
     let mut max = 0;
-    let mut max_valve: String;
+    let mut max_valve: String = String::from("");
 
-    for (v_name, v) in valves {
+    for (v_name, v) in valves.clone() {
+        if v_name == target_valve.name {
+            continue;
+        }
         let mut visited: HashSet<String> = Default::default();
         let mut q: VecDeque<(String, usize)> = Default::default();
-        visited.insert(v_name);
+        visited.insert(v_name.clone());
         q.push_back((v_name, 0));
 
         while !q.is_empty() {
             let (valve_name, d) = q.pop_front().unwrap();
+            visited.insert(valve_name.clone());
             let valve = valves.get(&valve_name).unwrap().clone();
             if valve_name == target_valve.name {
-                let score = valve.score(d, time_remaining);
-                if score > max {
+                let score = valve.clone().score(d, time_remaining);
+                if score > max && !valve.is_open {
                     max = score;
                     max_valve = valve.name;
                 }
@@ -160,10 +164,11 @@ mod tests {
     #[test]
     fn test_find_next_valve() {
         let input = load_file_to_string_vectors("src/solution/s16/example.txt");
-        let valves: Vec<Valve> = input
-            .into_iter()
-            .map(|line| line.parse().unwrap())
-            .collect();
+        let mut valves: HashMap<String, Valve> = Default::default();
+        for line in input {
+            let v = line.parse::<Valve>().unwrap();
+            valves.insert(v.name.clone(), v);
+        }
 
         assert_eq!(
             find_next_valve(valves.clone(), "AA".to_string(), 30),
